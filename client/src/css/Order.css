@@ -1,0 +1,95 @@
+
+/* Card */
+.order-card {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.order-id{
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Top */
+.order-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-top h4 {
+  margin: 0;
+}
+
+.date {
+  font-size: 12px;
+  color: gray;
+}
+
+/* Status */
+.status {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.delivered {
+  background: #e6f4ea;
+  color: #1e8549;
+}
+
+.transit {
+  background: #fff3cd;
+  color: #b58105;
+}
+
+/* Middle */
+.order-middle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.order-item-detail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.item-info-text {
+  font-size: 14px;
+  color: #333;
+}
+
+.icon {
+  font-size: 20px;
+}
+
+.item-count {
+  font-size: 13px;
+  color: gray;
+  margin-left: 5px;
+}
+
+.price {
+  font-weight: bold;
+}
+
+/* Bottom */
+.order-bottom {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #555;
+}

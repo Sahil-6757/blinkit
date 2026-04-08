@@ -1,0 +1,203 @@
+.product-section {
+  padding: 20px;
+  background: #f5f5f5;
+}
+
+/* ================= GRID ================= */
+
+/* Desktop (large screens) */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 15px;
+}
+
+/* Laptop */
+@media (max-width: 1200px) {
+  .product-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Tablet */
+@media (max-width: 992px) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Small Tablet */
+@media (max-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-section {
+    padding: 10px;
+  }
+}
+
+/* ================= CARD ================= */
+
+.product-card {
+  background: white;
+  border-radius: 12px;
+  padding: 12px;
+  position: relative;
+  transition: 0.2s;
+  border: 1px solid #eee;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+}
+
+/* ================= BADGES ================= */
+
+.badge-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.offer {
+  background: #1e8549;
+  color: white;
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+
+/* ================= IMAGE ================= */
+
+.product-img {
+  font-size: 50px;
+  text-align: center;
+  margin: 10px 0;
+}
+
+/* Smaller image on mobile */
+@media (max-width: 480px) {
+  .product-img {
+    font-size: 40px;
+  }
+}
+
+/* ================= TEXT ================= */
+
+.delivery {
+  font-size: 11px;
+  color: gray;
+}
+
+.name {
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+/* Prevent text overflow */
+.name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.qty {
+  font-size: 12px;
+  color: gray;
+}
+
+/* ================= BOTTOM ================= */
+
+.bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.price {
+  font-weight: bold;
+}
+
+.old-price {
+  text-decoration: line-through;
+  color: gray;
+  font-size: 12px;
+  margin-left: 5px;
+}
+
+/* ================= BUTTON ================= */
+
+.add-btn {
+  border: 1px solid #1e8549;
+  color: #1e8549;
+  background: white;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 60px;
+}
+
+.add-btn.added {
+  background: #1e8549;
+  color: white;
+}
+
+.add-btn:hover {
+  background: #0c831f;
+  color: white;
+}
+
+/* ================= COUNTER ================= */
+
+.counter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #0c831f;
+  color: white;
+  padding: 4px;
+  border-radius: 8px;
+  font-weight: 700;
+  min-width: 60px;
+  box-shadow: 0 2px 4px rgba(12, 131, 31, 0.2);
+}
+
+.counter button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  width: 22px;
+  height: 22px;
+}
+
+.counter span {
+  font-size: 13px;
+  text-align: center;
+}
+
+/* ================= LOADING ================= */
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #1e8549;
+}
