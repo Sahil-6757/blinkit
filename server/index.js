@@ -111,7 +111,8 @@ const Application = sequelize.define('Application', {
 const Category = sequelize.define('Category', {
   name: { type: DataTypes.STRING, allowNull: false, unique: true },
   icon: { type: DataTypes.STRING },
-  slug: { type: DataTypes.STRING, allowNull: false, unique: true }
+  slug: { type: DataTypes.STRING, allowNull: false, unique: true },
+  showInFooter: { type: DataTypes.BOOLEAN, defaultValue: true }
 }, {
   timestamps: true
 });
@@ -155,6 +156,20 @@ async function initDB() {
     // ✅ SAFE SYNC
     await sequelize.sync();
     console.log('✅ Database synced successfully');
+
+    // Ensure showInFooter column exists in Categories table
+    const [categoryTable] = await sequelize.query("SHOW COLUMNS FROM Categories LIKE 'showInFooter'");
+    if (categoryTable.length === 0) {
+      await sequelize.query("ALTER TABLE Categories ADD COLUMN showInFooter TINYINT(1) DEFAULT 1");
+      console.log('✅ Added showInFooter column to Categories table');
+    }
+
+    // Ensure category column exists in FAQs table
+    const [faqTable] = await sequelize.query("SHOW COLUMNS FROM FAQs LIKE 'category'");
+    if (faqTable.length === 0) {
+      await sequelize.query("ALTER TABLE FAQs ADD COLUMN category VARCHAR(255) DEFAULT 'General'");
+      console.log('✅ Added category column to FAQs table');
+    }
 
     // Ensure contacts table exists (optional safety)
     const [results] = await sequelize.query("SHOW TABLES LIKE 'contacts'");
@@ -446,7 +461,7 @@ app.get('/orders/:userId', async (req, res) => {
 app.get('/admin/orders', async (req, res) => {
   try {
     const orders = await Order.findAll({
-      include: [{ model: User, attributes: ['fullName', 'email', 'phone'] }],
+      include: [{ model: User, include: Address, attributes: ['fullName', 'email', 'phone'] }],
       order: [['createdAt', 'DESC']]
     });
     res.status(200).json(orders);
@@ -539,6 +554,20 @@ app.get('/categories', async (req, res) => {
     const categories = await Category.findAll();
     res.status(200).json(categories);
     console.log(categories)
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+app.put('/categories/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const category = await Category.findByPk(id);
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    await category.update(req.body);
+    res.status(200).json(category);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
