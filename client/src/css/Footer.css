@@ -4,6 +4,18 @@
   padding: 30px 40px 10px;
   font-family: Arial, sans-serif;
 }
+.social-icons {
+  font-size: 24px;
+  color: #a0aec0;
+  margin-right: 10px;
+}
+.social-icons:hover {
+  color: #ffc107;
+  transition: 0.2s;
+  transform: scale(1.1);
+  cursor: pointer;
+}
+
 
 /* ================= TOP FEATURES ================= */
 

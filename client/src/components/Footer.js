@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "../css/Footer.css";
 import { Zap} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube } from "react-icons/fa";
 function Footer() {
+  const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
   const scrollToTop = () => {
     window.scrollTo({
@@ -10,6 +12,24 @@ function Footer() {
       behavior: "smooth",
     });
   }
+   const fetchCategories = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/categories');
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(Array.isArray(data) ? data : []);
+        } else {
+          console.error("Failed to fetch categories: server responded with status", response.status);
+          setCategories([]);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        setCategories([]);
+      }
+    };
+    useEffect(() => {
+      fetchCategories();
+    }, []);
 
 
 
@@ -30,6 +50,16 @@ function Footer() {
               Your everyday grocery store, delivering fresh and quality
               products in minutes.
             </p>
+            <p className="">
+              Follow us on social media
+            </p>
+            <p className="">
+              <FaFacebookF size={24} className=" social-icons"/>
+              <FaTwitter size={24} className="mx-3 social-icons"/>
+              <FaInstagram size={24} className="mx-3 social-icons"/>
+              <FaYoutube size={24} className="mx-3 social-icons"/>
+            </p>
+
           </div>
 
           <div className="footer-col">
@@ -54,12 +84,13 @@ function Footer() {
           <div className="footer-col">
             <h3>Categories</h3>
             <ul>
-              <li onClick={()=>navigate("category/fruits-vegetables")}>Fruits & Vegetables</li>
-              <li onClick={()=>navigate("category/dairy-bread-eggs")}>Dairy, Bread & Eggs</li>
-              <li onClick={()=>navigate("category/snacks-munchies")}>Snacks & Munchies</li>
-              <li onClick={()=>navigate("category/cold-drinks-juices")}>Cold Drinks & Juices</li>
-              <li onClick={()=>navigate("category/breakfast-instant-food")}>Breakfast & Instant Food</li>
-              <li onClick={()=>navigate("category/bakery-biscuits")}>Bakery Biscuits</li>
+              {Array.isArray(categories) && categories
+                .filter(item => item.showInFooter !== false)
+                .map((item, index) => (
+                <li key={index} onClick={() => { navigate(`/category/${item.slug}`); scrollToTop(); }}>
+                  {item.name}
+                </li>
+              ))}
             </ul>
           </div>
 

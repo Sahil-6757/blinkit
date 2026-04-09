@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { User, BoxIcon, MapPin, Heart, LogOut, Plus, Trash2, CheckCircle, Truck, XCircle, ShoppingBag, Layers, ListIcon, LayersIcon, ListOrderedIcon, UserIcon, UserCheck, UserCheckIcon, UserCheck2Icon, LogOutIcon, BluetoothSearchingIcon, RssIcon, Edit, Heading3, Eye, FileText } from 'lucide-react';
+import { useState, useEffect } from 'react'
+import { BoxIcon, Plus, Trash2, CheckCircle, Truck, XCircle, ShoppingBag, Layers, ListIcon, LayersIcon, ListOrderedIcon, UserIcon, UserCheck, UserCheckIcon, UserCheck2Icon, LogOutIcon, BluetoothSearchingIcon, RssIcon, Edit, Heading3, Eye, FileText, CheckCircle2, CheckCircle2Icon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Modal from '@mui/material/Modal';
@@ -12,19 +12,11 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import "../css/sidebar.css";
 import {
-  FaThLarge,
-  FaSlidersH,
-  FaImages,
-  FaBlog,
-  FaBullhorn,
+
   FaCommentDots,
-  FaUsers,
-  FaSignOutAlt,
-  FaChevronDown
+
 } from "react-icons/fa";
-import Input from '@mui/material/Input';
 function Admin() {
-  const [openGallery, setOpenGallery] = useState(true);
   const [steps, setSteps] = useState("dashboard");
   const [allOrders, setAllOrders] = useState([]);
   const [items, setItems] = useState([]);
@@ -65,6 +57,8 @@ function Admin() {
   const [isFaqEdit, setIsFaqEdit] = useState(false);
   const [currentFaqId, setCurrentFaqId] = useState(null);
   const [filterCategory, setFilterCategory] = useState("All");
+  const [currentOrderPage, setCurrentOrderPage] = useState(1);
+  const ordersPerPage = 6;
 
   const normalizeCategory = (cat) => {
     if (!cat) return "";
@@ -92,7 +86,7 @@ function Admin() {
   useEffect(() => {
     const isAdmin = localStorage.getItem('admin') === 'true';
     const user = JSON.parse(localStorage.getItem('user'));
-    
+
     if (!isAdmin || !user || user.username.toLowerCase() !== 'admin') {
       navigate('/login');
       return;
@@ -115,9 +109,9 @@ function Admin() {
         setContacts(data);
       }
     } catch (err) {
-      toast.error("Failed to fetch contact messages",{
-        autoClose:800,
-        position:"bottom-center"
+      toast.error("Failed to fetch contact messages", {
+        autoClose: 800,
+        position: "bottom-center"
       });
     }
   };
@@ -129,16 +123,16 @@ function Admin() {
           method: 'DELETE'
         });
         if (res.ok) {
-          toast.success("Message deleted",{
-            autoClose:800,
-            position:"bottom-center"
+          toast.success("Message deleted", {
+            autoClose: 800,
+            position: "bottom-center"
           });
           fetchContacts();
         }
       } catch (err) {
-        toast.error("Failed to delete message",{
-          autoClose:800,
-          position:"bottom-center"
+        toast.error("Failed to delete message", {
+          autoClose: 800,
+          position: "bottom-center"
         });
       }
     }
@@ -152,9 +146,9 @@ function Admin() {
         setFaqs(data);
       }
     } catch (err) {
-      toast.error("Failed to fetch FAQs",{
-        autoClose:800,
-        position:"bottom-center"
+      toast.error("Failed to fetch FAQs", {
+        autoClose: 800,
+        position: "bottom-center"
       });
     }
   };
@@ -175,9 +169,9 @@ function Admin() {
         setBlogs(data);
       }
     } catch (err) {
-      toast.error("Failed to fetch blogs",{
-        autoClose:800,
-        position:"bottom-center"
+      toast.error("Failed to fetch blogs", {
+        autoClose: 800,
+        position: "bottom-center"
       });
     }
   };
@@ -189,16 +183,16 @@ function Admin() {
           method: 'DELETE'
         });
         if (res.ok) {
-          toast.success("Blog deleted",{
-            autoClose:800,
-            position:"bottom-center"
+          toast.success("Blog deleted", {
+            autoClose: 800,
+            position: "bottom-center"
           });
           fetchBlogs();
         }
       } catch (err) {
-        toast.error("Failed to delete blog",{
-          autoClose:800,
-          position:"bottom-center"
+        toast.error("Failed to delete blog", {
+          autoClose: 800,
+          position: "bottom-center"
         });
       }
     }
@@ -249,9 +243,9 @@ function Admin() {
         body: JSON.stringify(faqForm)
       });
       if (res.ok) {
-        toast.success(isFaqEdit ? "FAQ updated successfully" : "FAQ added successfully",{
-          autoClose:800,
-          position:"bottom-center"
+        toast.success(isFaqEdit ? "FAQ updated successfully" : "FAQ added successfully", {
+          autoClose: 800,
+          position: "bottom-center"
         });
         setOpenFaq(false);
         setIsFaqEdit(false);
@@ -260,9 +254,9 @@ function Admin() {
         setFaqForm({ question: "", answer: "", category: "General" });
       } else {
         const errorData = await res.json();
-        toast.error(errorData.message || (isFaqEdit ? "Failed to update FAQ" : "Failed to add FAQ"),{
-          autoClose:800,
-          position:"bottom-center"
+        toast.error(errorData.message || (isFaqEdit ? "Failed to update FAQ" : "Failed to add FAQ"), {
+          autoClose: 800,
+          position: "bottom-center"
         });
       }
     } catch (err) {
@@ -277,16 +271,16 @@ function Admin() {
           method: 'DELETE'
         });
         if (res.ok) {
-          toast.success("FAQ deleted",{
-            autoClose:800,
-            position:"bottom-center"
+          toast.success("FAQ deleted", {
+            autoClose: 800,
+            position: "bottom-center"
           });
           fetchFaqs();
         }
       } catch (err) {
-        toast.error("Failed to delete FAQ",{
-          autoClose:800,
-          position:"bottom-center"
+        toast.error("Failed to delete FAQ", {
+          autoClose: 800,
+          position: "bottom-center"
         });
       }
     }
@@ -312,9 +306,9 @@ function Admin() {
         body: formData
       });
       if (res.ok) {
-        toast.success(isBlogEdit ? "Blog updated successfully" : "Blog added successfully",{
-          autoClose:800,
-          position:"bottom-center"
+        toast.success(isBlogEdit ? "Blog updated successfully" : "Blog added successfully", {
+          autoClose: 800,
+          position: "bottom-center"
         });
         setIsBlogEdit(false);
         setCurrentBlogId(null);
@@ -387,9 +381,9 @@ function Admin() {
         body: JSON.stringify(catForm)
       });
       if (res.ok) {
-        toast.success("Category added successfully",{
-          autoClose:800,
-          position:"bottom-center"
+        toast.success("Category added successfully", {
+          autoClose: 800,
+          position: "bottom-center"
         });
         setOpenCat(false);
         fetchCategories();
@@ -399,9 +393,9 @@ function Admin() {
         toast.error(errorData.message || "Failed to add category");
       }
     } catch (err) {
-      toast.error("Failed to add category",{
-        autoClose:800,
-        position:"bottom-center"
+      toast.error("Failed to add category", {
+        autoClose: 800,
+        position: "bottom-center"
       });
     }
   };
@@ -413,16 +407,16 @@ function Admin() {
           method: 'DELETE'
         });
         if (res.ok) {
-          toast.success("Category deleted",{
-            autoClose:800,
-            position:"bottom-center"
+          toast.success("Category deleted", {
+            autoClose: 800,
+            position: "bottom-center"
           });
           fetchCategories();
         }
       } catch (err) {
-        toast.error("Failed to delete category",{
-          autoClose:800,
-          position:"bottom-center"
+        toast.error("Failed to delete category", {
+          autoClose: 800,
+          position: "bottom-center"
         });
       }
     }
@@ -460,9 +454,9 @@ function Admin() {
         body: JSON.stringify(itemForm)
       });
       if (res.ok) {
-        toast.success(isEdit ? "Item updated successfully" : "Item added successfully",{
-          autoClose:800,
-          position:"bottom-center"
+        toast.success(isEdit ? "Item updated successfully" : "Item added successfully", {
+          autoClose: 800,
+          position: "bottom-center"
         });
         setOpen(false);
         setIsEdit(false);
@@ -474,9 +468,9 @@ function Admin() {
         });
       }
     } catch (err) {
-      toast.error(isEdit ? "Failed to update item" : "Failed to add item",{
-        autoClose:800,
-        position:"bottom-center"
+      toast.error(isEdit ? "Failed to update item" : "Failed to add item", {
+        autoClose: 800,
+        position: "bottom-center"
       });
     }
   };
@@ -488,16 +482,16 @@ function Admin() {
           method: 'DELETE'
         });
         if (res.ok) {
-          toast.success("Item deleted",{
-            autoClose:800,
-            position:"bottom-center"
+          toast.success("Item deleted", {
+            autoClose: 800,
+            position: "bottom-center"
           });
           fetchItems();
         }
       } catch (err) {
-        toast.error("Failed to delete item",{
-          autoClose:800,
-          position:"bottom-center"
+        toast.error("Failed to delete item", {
+          autoClose: 800,
+          position: "bottom-center"
         });
       }
     }
@@ -518,9 +512,9 @@ function Admin() {
         setApplications(data);
       }
     } catch (err) {
-      toast.error("Failed to fetch applications",{
-        autoClose:800,
-        position:"bottom-center"
+      toast.error("Failed to fetch applications", {
+        autoClose: 800,
+        position: "bottom-center"
       });
     }
   };
@@ -534,16 +528,38 @@ function Admin() {
       });
 
       if (res.ok) {
-        toast.success(`Order status updated to ${newStatus}`,{
-          autoClose:800,
-          position:"bottom-center"
+        toast.success(`Order status updated to ${newStatus}`, {
+          autoClose: 800,
+          position: "bottom-center"
         });
         fetchOrders();
       }
     } catch (err) {
-      toast.error("Failed to update status",{
-        autoClose:800,
-        position:"bottom-center"
+      toast.error("Failed to update status", {
+        autoClose: 800,
+        position: "bottom-center"
+      });
+    }
+  };
+
+  const toggleFooterStatus = async (cat) => {
+    try {
+      const res = await fetch(`http://localhost:8000/categories/${cat.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ showInFooter: !cat.showInFooter })
+      });
+      if (res.ok) {
+        toast.success("Category footer status updated", {
+          autoClose: 800,
+          position: "bottom-center"
+        });
+        fetchCategories();
+      }
+    } catch (err) {
+      toast.error("Failed to update category", {
+        autoClose: 800,
+        position: "bottom-center"
       });
     }
   };
@@ -560,215 +576,7 @@ function Admin() {
 
 
   return (
-    // <div className='container'>
-    //   <h3 className='text-center text-success mt-4'>Admin Dashboard</h3>
-    //   <div className="profile-container mt-4">
-
-    //     {/* Sidebar */}
-    //     <div className="sidebar">
-    //       <div className={`menu ${steps === "allOrders" ? "active" : ""}`}
-    //         onClick={() => handleMenu("allOrders")}><BoxIcon size={16} /> Manage Orders</div>
-    //       <div className={`menu ${steps === "manageItems" ? "active" : ""}`}
-    //         onClick={() => handleMenu("manageItems")}><ShoppingBag size={16} /> Manage Items</div>
-    //       <div className={`menu ${steps === "manageCategories" ? "active" : ""}`}
-    //         onClick={() => handleMenu("manageCategories")}><Layers size={16} /> Manage Categories</div>
-    //       <div className={`menu ${steps === "profile" ? "active" : ""}`}
-    //         onClick={() => handleMenu("profile")}><User size={16} /> Admin Profile</div>
-    //       <div className={`text-danger menu`}
-    //         onClick={() => navigate('/login')}><LogOut size={16} /> Sign Out</div>
-    //     </div>
-
-    //     {/* Main Content */}
-    //     <div className="main-content flex-grow-1 p-4">
-    //       {steps === "allOrders" && (
-    //         <div className="admin-orders">
-    //           <h4 className="mb-4">All Customer Orders</h4>
-    //           <div className="table-responsive">
-    //             <table className="table table-hover align-middle">
-    //               <thead className="table-light">
-    //                 <tr>
-    //                   <th>Order ID</th>
-    //                   <th>Customer</th>
-    //                   <th>Items</th>
-    //                   <th>Total</th>
-    //                   <th>Status</th>
-    //                   <th>Actions</th>
-    //                 </tr>
-    //               </thead>
-    //               <tbody>
-    //                 {allOrders.map((order) => (
-    //                   <tr key={order.id}>
-    //                     <td><small className="text-muted">{order.orderId}</small></td>
-    //                     <td>
-    //                       <div>{order.User?.fullName}</div>
-    //                       <small className="text-muted">{order.User?.email}</small>
-    //                     </td>
-    //                     <td>
-    //                       <div className="admin-item-list">
-    //                         {Array.isArray(order.items) && order.items.map((item, i) => (
-    //                           <span key={i} title={item.name}>{item.icon || item}</span>
-    //                         ))}
-    //                         <small className="d-block text-muted">{order.itemCount} items</small>
-    //                       </div>
-    //                     </td>
-    //                     <td>₹{order.price}</td>
-    //                     <td>
-    //                       <span className={`badge ${order.status === 'Delivered' ? 'bg-success' : order.status === 'Cancelled' ? 'bg-danger' : 'bg-warning text-dark'}`}>
-    //                         {order.status}
-    //                       </span>
-    //                     </td>
-    //                     <td>
-    //                       <div className="btn-group btn-group-sm">
-    //                         <button
-    //                           className="btn btn-outline-primary"
-    //                           onClick={() => updateOrderStatus(order.id, 'In Transit')}
-    //                           title="Set to In Transit"
-    //                         >
-    //                           <Truck size={14} />
-    //                         </button>
-    //                         <button
-    //                           className="btn btn-outline-success"
-    //                           onClick={() => updateOrderStatus(order.id, 'Delivered')}
-    //                           title="Set to Delivered"
-    //                         >
-    //                           <CheckCircle size={14} />
-    //                         </button>
-    //                         <button
-    //                           className="btn btn-outline-danger"
-    //                           onClick={() => updateOrderStatus(order.id, 'Cancelled')}
-    //                           title="Cancel Order"
-    //                         >
-    //                           <XCircle size={14} />
-    //                         </button>
-    //                       </div>
-    //                     </td>
-    //                   </tr>
-    //                 ))}
-    //               </tbody>
-    //             </table>
-    //           </div>
-    //         </div>
-    //       )}
-
-    //       {steps === "manageItems" && (
-    //         <div className="admin-items">
-    //           <div className="d-flex justify-content-between align-items-center mb-4">
-    //             <h4>Product Inventory</h4>
-    //             <button className="btn btn-success d-flex align-items-center gap-2" onClick={() => setOpen(true)}>
-    //               <Plus size={18} /> Add New Product
-    //             </button>
-    //           </div>
-
-    //           <div className="table-responsive">
-    //             <table className="table table-hover align-middle">
-    //               <thead className="table-light">
-    //                 <tr>
-    //                   <th>Icon</th>
-    //                   <th>Product Info</th>
-    //                   <th>Price</th>
-    //                   <th>Offer</th>
-    //                   <th>Stock</th>
-    //                   <th>Actions</th>
-    //                 </tr>
-    //               </thead>
-    //               <tbody>
-    //                 {items.map((item) => (
-    //                   <tr key={item.id}>
-    //                     <td className="fs-3">{item.icon}</td>
-    //                     <td>
-    //                       <div className="fw-bold">{item.name}</div>
-    //                       <small className="text-muted">{item.qty} | {item.category}</small>
-    //                     </td>
-    //                     <td>
-    //                       <div>₹{item.price}</div>
-    //                       <small className="text-decoration-line-through text-muted">₹{item.oldPrice}</small>
-    //                     </td>
-    //                     <td><span className="badge bg-info text-dark">{item.offer}</span></td>
-    //                     <td><span className={`badge ${item.stock === 'Available' ? 'bg-success' : 'bg-danger'}`}>{item.stock}</span></td>
-    //                     <td>
-    //                       <button className="btn btn-outline-danger btn-sm" onClick={() => deleteItem(item.id)}>
-    //                         <Trash2 size={16} />
-    //                       </button>
-    //                     </td>
-    //                   </tr>
-    //                 ))}
-    //               </tbody>
-    //             </table>
-    //           </div>
-    //         </div>
-    //       )}
-
-    //       <Modal open={open} onClose={() => setOpen(false)}>
-    //         <Box sx={style}>
-    //           <Typography variant="h6" component="h2" sx={{ mb: 3 }}>
-    //             Add New Product
-    //           </Typography>
-    //           <form onSubmit={handleAddItem}>
-    //             <div className="row">
-    //               <div className="col-md-6 mb-3">
-    //                 <TextField fullWidth label="Product ID" name="id" value={itemForm.id} onChange={handleItemChange} required size="small" />
-    //               </div>
-    //               <div className="col-md-6 mb-3">
-    //                 <TextField fullWidth label="Product Name" name="name" value={itemForm.name} onChange={handleItemChange} required size="small" />
-    //               </div>
-    //             </div>
-    //             <div className="row">
-    //               <div className="col-md-6 mb-3">
-    //                 <TextField fullWidth label="Quantity (e.g. 500g)" name="qty" value={itemForm.qty} onChange={handleItemChange} required size="small" />
-    //               </div>
-    //               <div className="col-md-6 mb-3">
-    //                 <TextField fullWidth label="Icon (Emoji)" name="icon" value={itemForm.icon} onChange={handleItemChange} required size="small" />
-    //               </div>
-    //             </div>
-    //             <div className="row">
-    //               <div className="col-md-6 mb-3">
-    //                 <TextField fullWidth label="Price" name="price" type="number" value={itemForm.price} onChange={handleItemChange} required size="small" />
-    //               </div>
-    //               <div className="col-md-6 mb-3">
-    //                 <TextField fullWidth label="Old Price" name="oldPrice" type="number" value={itemForm.oldPrice} onChange={handleItemChange} size="small" />
-    //               </div>
-    //             </div>
-    //             <div className="row">
-    //               <div className="col-md-6 mb-3">
-    //                 <TextField fullWidth label="Offer (e.g. 10% OFF)" name="offer" value={itemForm.offer} onChange={handleItemChange} size="small" />
-    //               </div>
-    //               <div className="col-md-6 mb-3">
-    //                 <TextField fullWidth label="Tag (e.g. Bestseller)" name="tag" value={itemForm.tag} onChange={handleItemChange} size="small" />
-    //               </div>
-    //             </div>
-    //             <div className="row">
-    //               <div className="col-md-6 mb-3">
-    //                 <TextField fullWidth label="Category" name="category" value={itemForm.category} onChange={handleItemChange} required size="small" />
-    //               </div>
-    //               <div className="col-md-6 mb-3">
-    //                 <TextField fullWidth label="Sub-Category" name="subCategory" value={itemForm.subCategory} onChange={handleItemChange} size="small" />
-    //               </div>
-    //             </div>
-    //             <div className="row">
-    //               <div className="col-md-6 mb-3">
-    //                 <TextField fullWidth label="Delivery Time" name="delivery" value={itemForm.delivery} onChange={handleItemChange} size="small" />
-    //               </div>
-    //               <div className="col-md-6 mb-3">
-    //                 <TextField fullWidth label="Stock Status" name="stock" value={itemForm.stock} onChange={handleItemChange} size="small" placeholder="Available" />
-    //               </div>
-    //             </div>
-    //             <div className="d-flex gap-2 mt-4">
-    //               <button type="submit" className="btn btn-success flex-grow-1">Add Product</button>
-    //               <button type="button" className="btn btn-secondary" onClick={() => setOpen(false)}>Cancel</button>
-    //             </div>
-    //           </form>
-    //         </Box>
-    //       </Modal>
-
-    //       {steps === "profile" && (
-    //         <div className="profile-content-form">
-    //           <h4>Admin Profile</h4>
-    //           <p className="text-muted">Admin management features coming soon...</p>
-    //         </div>
-    //       )}
-    //     </div>
-    //   </div>
-    // </div>
+    
     <>
       <div className='Admin-Container'>
         <div className='sidebar'>
@@ -777,12 +585,13 @@ function Admin() {
           <p className='sidebar-title' onClick={() => setSteps("categories")}> <LayersIcon /> Manage Categories</p>
           <p className='sidebar-title' onClick={() => setSteps("orders")}> <ListOrderedIcon /> Manage Orders</p>
           <p className='sidebar-title' onClick={() => setSteps("users")}> <UserIcon /> Manage Users</p>
+          <p className='sidebar-title' onClick={() => setSteps("roles")}> <UserIcon /> Manage Role</p>
           <p className='sidebar-title' onClick={() => setSteps("blogs")}> <RssIcon /> Manage Blogs</p>
           <p className='sidebar-title' onClick={() => setSteps("faqs")}> <UserCheckIcon /> Manage FAQs</p>
           <p className='sidebar-title' onClick={() => setSteps("applications")}> <UserCheckIcon /> Manage Applications</p>
           <p className='sidebar-title' onClick={() => setSteps("contacts")}> <FaCommentDots /> Contact Messages</p>
           <p className='sidebar-title' onClick={() => setSteps("terms")}> <UserCheck2Icon /> Terms and Conditions</p>
-          <p className='sidebar-title' style={{ color: "red" }} onClick={() => handleLogout()}> <LogOutIcon /> Logout</p>
+          {/* <p className='sidebar-title' style={{ color: "red" }} onClick={() => handleLogout()}> <LogOutIcon /> Logout</p> */}
         </div>
 
         <div className='admin-mainContent'>
@@ -799,7 +608,7 @@ function Admin() {
                       <div className='card-header'>
                         <RssIcon />
                         <p>Blog Posts</p>
-                        <p className='text-success text-bold'>{blogs.length}</p>
+                        <p className='text-success' style={{ fontSize: "26px", fontWeight: "bold" }}>{blogs.length}</p>
                       </div>
                     </div>
                   </div>
@@ -809,7 +618,7 @@ function Admin() {
                       <div className='card-header'>
                         <ShoppingBag size={24} />
                         <p>Total Items</p>
-                        <p className='text-success text-bold'>{items.length}</p>
+                        <p className='text-success' style={{ fontSize: "26px", fontWeight: "bold" }}>{items.length}</p>
                       </div>
                     </div>
                   </div>
@@ -819,7 +628,7 @@ function Admin() {
                       <div className='card-header'>
                         <Layers size={24} />
                         <p>Total Categories</p>
-                        <p className='text-success text-bold'>{categories.length}</p>
+                        <p className='text-success' style={{ fontSize: "26px", fontWeight: "bold" }}>{categories.length}</p>
                       </div>
                     </div>
                   </div>
@@ -829,7 +638,7 @@ function Admin() {
                       <div className='card-header'>
                         <BoxIcon size={24} />
                         <p>Total Orders</p>
-                        <p className='text-success text-bold'>{allOrders.length}</p>
+                        <p className='text-success' style={{ fontSize: "26px", fontWeight: "bold" }}>{allOrders.length}</p>
                       </div>
                     </div>
                   </div>
@@ -839,7 +648,7 @@ function Admin() {
                       <div className='card-header'>
                         <ListIcon size={24} />
                         <p>Total FAQs</p>
-                        <p className='text-success text-bold'>{faqs.length}</p>
+                        <p className='text-success' style={{ fontSize: "26px", fontWeight: "bold" }}>{faqs.length}</p>
                       </div>
                     </div>
                   </div>
@@ -849,7 +658,7 @@ function Admin() {
                       <div className='card-header'>
                         <FaCommentDots size={24} />
                         <p>Total Messages</p>
-                        <p className='text-success text-bold'>{contacts.length}</p>
+                        <p className='text-success' style={{ fontSize: "26px", fontWeight: "bold" }}>{contacts.length}</p>
                       </div>
                     </div>
                   </div>
@@ -957,6 +766,7 @@ function Admin() {
                         <th>Slug</th>
                         <th>Created At</th>
                         <th>Actions</th>
+                        <th>Allow to Add in footer</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -970,7 +780,13 @@ function Admin() {
                             <button className="btn btn-outline-danger btn-sm" onClick={() => deleteCategory(cat.id)}>
                               <Trash2 size={16} />
                             </button>
+                            
                           </td>
+                          <td>
+                            <div className="form-check form-switch">
+  <input className="form-check-input toggleSwitch-btn" type="checkbox" role="switch" id="switchCheckDefault" checked={cat.showInFooter} onChange={() => toggleFooterStatus(cat)} />
+</div> </td>
+                   
                         </tr>
                       ))}
                     </tbody>
@@ -996,7 +812,9 @@ function Admin() {
                       </tr>
                     </thead>
                     <tbody>
-                      {allOrders.map((order) => (
+                      {allOrders
+                        .slice((currentOrderPage - 1) * ordersPerPage, currentOrderPage * ordersPerPage)
+                        .map((order) => (
                         <tr key={order.id}>
                           {
                             console.log(order)
@@ -1005,7 +823,10 @@ function Admin() {
                           <td>
                             <div>{order.User?.fullName}</div>
                             <small className="text-muted">{order.User?.email}</small>
-                            <small className="text-muted">{order.User?.phone}</small>
+                            <small className="text-muted d-block">{order.User?.phone}</small>
+                            <small className="text-muted d-block mt-1">
+                              <strong>Address:</strong> {order.address}
+                            </small>
                           </td>
                           <td>
                             <div className="admin-item-list">
@@ -1054,6 +875,28 @@ function Admin() {
                       ))}
                     </tbody>
                   </table>
+                </div>
+
+                {/* Pagination Controls */}
+                <div className="d-flex justify-content-between align-items-center mt-4">
+                  <div className="text-muted small">
+                    Showing {(currentOrderPage - 1) * ordersPerPage + 1} to {Math.min(currentOrderPage * ordersPerPage, allOrders.length)} of {allOrders.length} orders
+                  </div>
+                  <nav>
+                    <ul className="pagination pagination-sm mb-0">
+                      <li className={`page-item ${currentOrderPage === 1 ? 'disabled' : ''}`}>
+                        <button className="page-link" onClick={() => setCurrentOrderPage(prev => Math.max(prev - 1, 1))}>Previous</button>
+                      </li>
+                      {[...Array(Math.ceil(allOrders.length / ordersPerPage))].map((_, i) => (
+                        <li key={i} className={`page-item ${currentOrderPage === i + 1 ? 'active' : ''}`}>
+                          <button className="page-link" onClick={() => setCurrentOrderPage(i + 1)}>{i + 1}</button>
+                        </li>
+                      ))}
+                      <li className={`page-item ${currentOrderPage === Math.ceil(allOrders.length / ordersPerPage) ? 'disabled' : ''}`}>
+                        <button className="page-link" onClick={() => setCurrentOrderPage(prev => Math.min(prev + 1, Math.ceil(allOrders.length / ordersPerPage)))}>Next</button>
+                      </li>
+                    </ul>
+                  </nav>
                 </div>
               </div>
             )
@@ -1254,16 +1097,16 @@ function Admin() {
                                           method: 'DELETE'
                                         });
                                         if (res.ok) {
-                                          toast.success("Application deleted successfully",{
-                                            autoClose:800,
-                                            position:"bottom-center"
+                                          toast.success("Application deleted successfully", {
+                                            autoClose: 800,
+                                            position: "bottom-center"
                                           });
                                           getApplications();
                                         }
                                       } catch (err) {
-                                        toast.error("Failed to delete application",{
-                                          autoClose:800,
-                                          position:"bottom-center"
+                                        toast.error("Failed to delete application", {
+                                          autoClose: 800,
+                                          position: "bottom-center"
                                         });
                                       }
                                     }

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, MapPin, Ticket, Receipt, ShoppingBag, Clock, ShieldCheck, ChevronRight } from 'lucide-react';
-import { getCart, addToCart, removeFromCart, deleteFromCart, clearCart } from '../utils/cartUtils';
+import { getCart, addToCart, removeFromCart,  clearCart } from '../utils/cartUtils';
 import '../css/Cart.css';
 import { toast } from 'react-toastify';
 
@@ -87,12 +87,12 @@ function Cart() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData)
       });
-
-      if (res.ok) {
-        toast.success("Order placed successfully!", {
+toast.success("Order placed successfully!", {
           position: "bottom-center",
           autoClose: 800,
         });
+      if (res.ok) {
+        
         clearCart();
         setTimeout(() => {
           navigate('/account');
