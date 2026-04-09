@@ -585,6 +585,7 @@ function Admin() {
           <p className='sidebar-title' onClick={() => setSteps("categories")}> <LayersIcon /> Manage Categories</p>
           <p className='sidebar-title' onClick={() => setSteps("orders")}> <ListOrderedIcon /> Manage Orders</p>
           {/* <p className='sidebar-title' onClick={() => setSteps("users")}> <UserIcon /> Manage Users</p> */}
+          {/* heekkkoowww */}
           <p className='sidebar-title' onClick={() => setSteps("roles")}> <UserIcon /> Manage Role</p>
           <p className='sidebar-title' onClick={() => setSteps("blogs")}> <RssIcon /> Manage Blogs</p>
           <p className='sidebar-title' onClick={() => setSteps("faqs")}> <UserCheckIcon /> Manage FAQs</p>
