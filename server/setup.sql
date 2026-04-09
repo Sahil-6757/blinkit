@@ -14,6 +14,11 @@ CREATE TABLE IF NOT EXISTS Users (
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+create table if note exists Terms (
+    id int primary key auto_increment,
+    terms text
+)
+
 -- Table for Items
 CREATE TABLE IF NOT EXISTS Items (
     id VARCHAR(50) PRIMARY KEY,

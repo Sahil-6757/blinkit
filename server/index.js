@@ -8,7 +8,8 @@ const app = express();
 const port = 8000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/uploads', express.static('uploads'));
 
 // Multer Config
@@ -37,7 +38,17 @@ const User = sequelize.define('User', {
   username: { type: DataTypes.STRING, allowNull: false, unique: true },
   password: { type: DataTypes.STRING, allowNull: false },
   phone: { type: DataTypes.STRING, allowNull: true },
-  gender: { type: DataTypes.STRING, allowNull: true }
+  gender: { type: DataTypes.STRING, allowNull: true },
+  roleId: { type: DataTypes.INTEGER, allowNull: true }, // Reference to Role model
+  post: { type: DataTypes.STRING, allowNull: true } // Custom designation
+});
+
+// Role Model
+const Role = sequelize.define('Role', {
+  name: { type: DataTypes.STRING, allowNull: false, unique: true },
+  displayName: { type: DataTypes.STRING, allowNull: false },
+  description: { type: DataTypes.TEXT },
+  permissions: { type: DataTypes.JSON, defaultValue: [] }
 });
 
 // Address Model
@@ -70,6 +81,9 @@ Address.belongsTo(User, { foreignKey: 'userId' });
 
 User.hasMany(Order, { foreignKey: 'userId' });
 Order.belongsTo(User, { foreignKey: 'userId' });
+
+Role.hasMany(User, { foreignKey: 'roleId' });
+User.belongsTo(Role, { foreignKey: 'roleId' });
 
 // Item Model
 const Item = sequelize.define('Item', {
@@ -144,6 +158,21 @@ const FAQ = sequelize.define('FAQ', {
   timestamps: false
 });
 
+const Terms = sequelize.define('Terms', {
+  terms: { type: DataTypes.TEXT, allowNull: false },
+}, {
+  timestamps: false
+})
+
+// Permission Model
+const Permission = sequelize.define('Permission', {
+  key: { type: DataTypes.STRING, allowNull: false, unique: true },
+  label: { type: DataTypes.STRING, allowNull: false },
+  category: { type: DataTypes.STRING, allowNull: false }
+}, {
+  timestamps: false
+});
+
 // Sync Database
 async function initDB() {
   try {
@@ -169,6 +198,65 @@ async function initDB() {
     if (faqTable.length === 0) {
       await sequelize.query("ALTER TABLE FAQs ADD COLUMN category VARCHAR(255) DEFAULT 'General'");
       console.log('✅ Added category column to FAQs table');
+    }
+
+    // Ensure roleId column exists in Users table
+    const [userTable] = await sequelize.query("SHOW COLUMNS FROM Users LIKE 'roleId'");
+    if (userTable.length === 0) {
+      await sequelize.query("ALTER TABLE Users ADD COLUMN roleId INT NULL");
+      console.log('✅ Added roleId column to Users table');
+    }
+
+    // Ensure post column exists in Users table
+    const [userPostTable] = await sequelize.query("SHOW COLUMNS FROM Users LIKE 'post'");
+    if (userPostTable.length === 0) {
+      await sequelize.query("ALTER TABLE Users ADD COLUMN post VARCHAR(255) NULL");
+      console.log('✅ Added post column to Users table');
+    }
+
+    // Initial Roles
+    const [rolesCount] = await sequelize.query("SELECT COUNT(*) as count FROM Roles");
+    if (rolesCount[0].count === 0) {
+      await Role.bulkCreate([
+        {
+          name: 'super_admin',
+          displayName: 'Super Admin',
+          description: 'Full access to all system modules',
+          permissions: ['all']
+        },
+        {
+          name: 'inventory_manager',
+          displayName: 'Inventory Manager',
+          description: 'Can manage products and categories',
+          permissions: ['products_view', 'products_manage', 'categories_view', 'categories_manage']
+        },
+        {
+          name: 'order_manager',
+          displayName: 'Order Manager',
+          description: 'Can manage customer orders',
+          permissions: ['orders_view', 'orders_manage']
+        }
+      ]);
+      console.log('✅ Initial roles created');
+    }
+
+    // Initial Permissions
+    const permissionsCount = await Permission.count();
+    if (permissionsCount === 0) {
+      await Permission.bulkCreate([
+        { key: "products_view", label: "View Products", category: "Inventory" },
+        { key: "products_manage", label: "Manage Products", category: "Inventory" },
+        { key: "categories_view", label: "View Categories", category: "Inventory" },
+        { key: "categories_manage", label: "Manage Categories", category: "Inventory" },
+        { key: "orders_view", label: "View Orders", category: "Orders" },
+        { key: "orders_manage", label: "Manage Orders", category: "Orders" },
+        { key: "users_view", label: "View Users", category: "Users" },
+        { key: "users_manage", label: "Manage Users", category: "Users" },
+        { key: "blogs_manage", label: "Manage Blogs", category: "Content" },
+        { key: "faqs_manage", label: "Manage FAQs", category: "Content" },
+        { key: "contacts_view", label: "View Contacts", category: "Content" }
+      ]);
+      console.log('✅ Initial permissions created');
     }
 
     // Ensure contacts table exists (optional safety)
@@ -226,6 +314,130 @@ app.post('/register', async (req, res) => {
         email: newUser.email,
         phone: newUser.phone,
         gender: newUser.gender
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+app.put('/admin/terms', async (req, res) => {
+  try {
+    const { terms } = req.body;
+    const existingTerms = await Terms.findOne();
+    if (existingTerms) {
+      await Terms.update({ terms }, { where: { id: existingTerms.id } });
+    } else {
+      await Terms.create({ terms });
+    }
+    res.status(200).json({ message: 'Terms updated successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+app.get('/terms', async (req, res) => {
+  try {
+    const terms = await Terms.findOne();
+    res.status(200).json(terms);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// Admin Add User with Role
+app.post('/admin/add-user', async (req, res) => {
+  const { fullName, email, username, password, phone, gender, roleId, post } = req.body;
+
+  try {
+    const existingUser = await User.findOne({
+      where: {
+        [Op.or]: [{ email }, { username }]
+      }
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ message: 'User with this email or username already exists' });
+    }
+
+    const newUser = await User.create({ 
+      fullName, 
+      email, 
+      username, 
+      password, 
+      phone, 
+      gender,
+      roleId: roleId === 'other' ? null : parseInt(roleId),
+      post: roleId === 'other' ? post : null
+    });
+
+    res.status(201).json({
+      message: 'Admin user created successfully',
+      user: {
+        id: newUser.id,
+        fullName: newUser.fullName,
+        username: newUser.username,
+        email: newUser.email,
+        roleId: newUser.roleId,
+        post: newUser.post
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// Admin Update User
+app.put('/admin/users/:id', async (req, res) => {
+  const { id } = req.params;
+  const { fullName, email, username, password, phone, gender, roleId, post } = req.body;
+
+  try {
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if email or username is already taken by another user
+    const existingUser = await User.findOne({
+      where: {
+        [Op.and]: [
+          { [Op.or]: [{ email }, { username }] },
+          { id: { [Op.ne]: id } }
+        ]
+      }
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email or username already in use' });
+    }
+
+    const updateData = {
+      fullName,
+      email,
+      username,
+      phone,
+      gender,
+      roleId: roleId === 'other' ? null : (roleId ? parseInt(roleId) : null),
+      post: roleId === 'other' ? post : null
+    };
+
+    // Only update password if provided
+    if (password && password.trim() !== "") {
+      updateData.password = password;
+    }
+
+    await user.update(updateData);
+
+    res.status(200).json({
+      message: 'User updated successfully',
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        username: user.username,
+        email: user.email,
+        roleId: user.roleId,
+        post: user.post
       }
     });
   } catch (err) {
@@ -354,7 +566,7 @@ app.post('/login', async (req, res) => {
   try {
     const user = await User.findOne({
       where: { username },
-      include: [Address, Order]
+      include: [Address, Order, Role]
     });
     if (!user || user.password !== password) {
       return res.status(400).json({ message: 'Invalid username or password' });
@@ -370,7 +582,8 @@ app.post('/login', async (req, res) => {
         phone: user.phone,
         gender: user.gender,
         addresses: user.Addresses,
-        orders: user.Orders
+        orders: user.Orders,
+        role: user.Role
       }
     });
   } catch (err) {
@@ -548,7 +761,188 @@ app.post('/careers', upload.single('resumePdf'), async (req, res) => {
   }
 });
 
-// Category Endpoints
+// Roles API
+app.get('/roles', async (req, res) => {
+  try {
+    const roles = await Role.findAll();
+    const customPosts = await User.findAll({
+      attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('post')), 'post']],
+      where: {
+        post: { [Op.ne]: null }
+      }
+    });
+    
+    const formattedCustomRoles = customPosts.map((cp, index) => ({
+      id: `custom-${index}`,
+      name: cp.post.toLowerCase().replace(/\s+/g, '_'),
+      displayName: cp.post,
+      description: 'Custom designation defined by Admin',
+      permissions: [],
+      isCustom: true
+    }));
+
+    res.status(200).json([...roles, ...formattedCustomRoles]);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+app.put('/roles/:id/permissions', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { permissions } = req.body;
+    const role = await Role.findByPk(id);
+    if (!role) {
+      return res.status(404).json({ message: 'Role not found' });
+    }
+    await role.update({ permissions });
+    res.status(200).json(role);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+app.post('/roles', async (req, res) => {
+  try {
+    const { name, displayName, description, permissions } = req.body;
+    const existingRole = await Role.findOne({ where: { name } });
+    if (existingRole) {
+      return res.status(400).json({ message: 'Role with this name already exists' });
+    }
+    const newRole = await Role.create({ 
+      name, 
+      displayName, 
+      description, 
+      permissions: permissions || [] 
+    });
+    res.status(201).json(newRole);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+app.delete('/roles/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Check if it's a custom role (starts with 'custom-')
+    if (id.startsWith('custom-')) {
+      const { displayName } = req.query; // Admin.js will pass displayName in query
+      if (!displayName) {
+        return res.status(400).json({ message: 'Display name is required for custom role deletion' });
+      }
+      
+      // Delete custom role means clearing the 'post' field for all users with that designation
+      await User.update({ post: null }, { where: { post: displayName } });
+      return res.status(200).json({ message: `Custom designation '${displayName}' removed from all users` });
+    }
+
+    // Standard role deletion
+    const role = await Role.findByPk(id);
+    if (!role) {
+      return res.status(404).json({ message: 'Role not found' });
+    }
+
+    // Check if any user is assigned to this role
+    const userCount = await User.count({ where: { roleId: id } });
+    if (userCount > 0) {
+      return res.status(400).json({ message: 'Cannot delete role as it is assigned to users' });
+    }
+
+    await role.destroy();
+    res.status(200).json({ message: 'Role deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// Permissions API
+app.get('/admin/permissions', async (req, res) => {
+  try {
+    const permissions = await Permission.findAll();
+    
+    // Format the permissions into categories as expected by the frontend
+    const formattedPermissions = permissions.reduce((acc, perm) => {
+      if (!acc[perm.category]) {
+        acc[perm.category] = [];
+      }
+      acc[perm.category].push({ key: perm.key, label: perm.label, id: perm.id });
+      return acc;
+    }, {});
+    
+    res.status(200).json(formattedPermissions);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// For management UI (flat list)
+app.get('/admin/permissions/list', async (req, res) => {
+  try {
+    const permissions = await Permission.findAll();
+    res.status(200).json(permissions);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+app.post('/admin/permissions', async (req, res) => {
+  try {
+    const { key, label, category } = req.body;
+    const existingPerm = await Permission.findOne({ where: { key } });
+    if (existingPerm) {
+      return res.status(400).json({ message: 'Permission key already exists' });
+    }
+    const newPerm = await Permission.create({ key, label, category });
+    res.status(201).json(newPerm);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+app.delete('/admin/permissions/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const perm = await Permission.findByPk(id);
+    if (!perm) {
+      return res.status(404).json({ message: 'Permission not found' });
+    }
+    await perm.destroy();
+    res.status(200).json({ message: 'Permission deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+app.delete('/admin/user/:id',async(req,res)=>{
+  try{
+    const { id } = req.params;
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    await user.destroy();
+    res.status(200).json({ message: 'User deleted successfully' });
+  }
+  catch(err){
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+})
+
+// Users API
+app.get('/admin/users', async (req, res) => {
+  try {
+    const users = await User.findAll({
+      include: [{ model: Role, attributes: ['id', 'name', 'displayName', 'description', 'permissions'] }],
+      attributes: ['id', 'fullName', 'email', 'username', 'phone', 'gender', 'roleId', 'post', 'createdAt']
+    });
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// Category API
 app.get('/categories', async (req, res) => {
   try {
     const categories = await Category.findAll();

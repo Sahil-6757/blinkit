@@ -7,7 +7,9 @@ import {
   Zap,
   ChevronDown,
   Navigation,
- 
+  Menu,
+  X,
+  LogOutIcon
 } from "lucide-react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -18,7 +20,7 @@ import { getCart } from "../utils/cartUtils";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
-  
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [user, setUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
@@ -122,91 +124,146 @@ const Navbar = () => {
   const handleIcon = () => {};
 
   return (
-    <div className="navbar">
-      {/* Left Section */}
-      <div className="navbar-left">
-        <div className="home" onClick={handleIcon}>
-          <Link to={"/"} style={{ textDecoration: "none", color: "white" }}>
-            <h2 className="logo">
-              {<Zap size={20} style={{ color: "#ffc105" }} />} blink
-              <span className="it">it</span>
-            </h2>
-          </Link>
-        </div>
+    <div className="navbar-container">
+      <div className="navbar">
+        {/* Left Section */}
+        <div className="navbar-left">
+          <div className="home" onClick={handleIcon}>
+            <Link to={"/"} style={{ textDecoration: "none", color: "white" }}>
+              <h2 className="logo">
+                {<Zap size={20} style={{ color: "#ffc105" }} />} blink
+                <span className="it">it</span>
+              </h2>
+            </Link>
+          </div>
 
-        <div className="location" onClick={handleDelivery}>
-          <span className="delivery-text">DELIVERY IN</span>
-          <div className="location-row">
-            <MapPin size={16} style={{ color: "#ffffffb3" }} />
-            {location ? (
-              <span style={{ color: "#ffffffb3" }}>
-                {location.address.city ||
-                  location.address.town ||
-                  location.address.village ||
-                  "Unknown Location"}
-              </span>
-            ) : (
-              <span style={{ color: "#ffffffb3" }}>Select Location</span>
-            )}
-            {<ChevronDown size={16} style={{ color: "#ffffffb3" }} />}
+          <div className="location" onClick={handleDelivery}>
+            <span className="delivery-text">DELIVERY IN</span>
+            <div className="location-row">
+              <MapPin size={16} style={{ color: "#ffffffb3" }} />
+              {location ? (
+                <span style={{ color: "#ffffffb3" }}>
+                  {location.address.city ||
+                    location.address.town ||
+                    location.address.village ||
+                    "Unknown Location"}
+                </span>
+              ) : (
+                <span style={{ color: "#ffffffb3" }}>Select Location</span>
+              )}
+              {<ChevronDown size={16} style={{ color: "#ffffffb3" }} />}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Search Bar */}
-      <div className="search-bar">
-        <Search size={18} className="search-icon" onClick={handleSearchClick} style={{ cursor: 'pointer' }} />
-        <input 
-          type="text" 
-          className="p-0" 
-          placeholder='Search "groceries"' 
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyPress={handleSearch}
-        />
-      </div>
+        {/* Search Bar */}
+        <div className="search-bar">
+          <Search size={18} className="search-icon" onClick={handleSearchClick} style={{ cursor: 'pointer' }} />
+          <input 
+            type="text" 
+            className="p-0" 
+            placeholder='Search "groceries"' 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearch}
+          />
+        </div>
 
-      {/* Right Section */}
-      <div className="navbar-right">
-        {user ? (
-          <div className="d-flex align-items-center gap-3">
-            <Link
-              to={
-                (localStorage.getItem('admin') === 'true' ||
-                 (user?.username && user.username.toLowerCase() === 'admin'))
-                  ? "/admin"
-                  : "/account"
-              }
-              style={{ textDecoration: "none", color: "white" }}
-            >
+        
+
+        {/* Right Section */}
+        <div className="navbar-right">
+          {user ? (
+            <div className="d-flex align-items-center gap-3">
+              <Link
+                to={
+                  (localStorage.getItem('admin') === 'true' ||
+                   (user?.username && user.username.toLowerCase() === 'admin'))
+                    ? "/admin"
+                    : "/account"
+                }
+                style={{ textDecoration: "none", color: "white" }}
+              >
+                <div className="account">
+                  <User size={20} />
+                  <span className="account">{user.username}</span>
+                </div>
+              </Link>
+              <button 
+                onClick={handleLogout} 
+                className="btn btn-sm btn-outline-light"
+                style={{ fontWeight: 'bold' }}
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <Link to="/login" style={{ textDecoration: "none", color: "white" }}>
               <div className="account">
                 <User size={20} />
-                <span className="account">{user.username}</span>
+                <span className="account">Login</span>
               </div>
             </Link>
-            <button 
-              onClick={handleLogout} 
-              className="btn btn-sm btn-outline-light"
-              style={{ fontWeight: 'bold' }}
-            >
-              Logout
+          )}
+          <Link to="/cart" style={{ textDecoration: "none", color: "white" }}>
+            <button className="cart-btn">
+              <ShoppingCart size={18} />
+              {cartCount > 0 ? `My Cart (${cartCount})` : 'My Cart'}
             </button>
-          </div>
-        ) : (
-          <Link to="/login" style={{ textDecoration: "none", color: "white" }}>
-            <div className="account">
-              <User size={20} />
-              <span className="account">Login</span>
-            </div>
           </Link>
-        )}
-        <Link to="/cart" style={{ textDecoration: "none", color: "white" }}>
-          <button className="cart-btn">
-            <ShoppingCart size={18} />
-            {cartCount > 0 ? `My Cart (${cartCount})` : 'My Cart'}
-          </button>
-        </Link>
+        </div>
+
+        {/* Mobile Toggle Icon */}
+        <div className="mobile-menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </div>
       </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {isMenuOpen && (
+        <>
+          <div className="mobile-overlay" onClick={() => setIsMenuOpen(false)}></div>
+          <div className="mobile-sidebar">
+            <div className="mobile-header">
+              <span>Menu</span>
+              <X size={24} onClick={() => setIsMenuOpen(false)} style={{ cursor: 'pointer' }} />
+            </div>
+            
+            <div className="mobile-menu-item" onClick={() => { handleDelivery(); setIsMenuOpen(false); }}>
+              <MapPin size={18} />
+              <span>Select Location</span>
+            </div>
+
+            {user ? (
+              <>
+                <Link 
+                  to={
+                    (localStorage.getItem('admin') === 'true' ||
+                     (user?.username && user.username.toLowerCase() === 'admin'))
+                      ? "/admin"
+                      : "/account"
+                  } 
+                  className="mobile-menu-item"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <User size={18} />
+                  <span>My Account ({user.username})</span>
+                </Link>
+                <div className="mobile-menu-item" onClick={() => { handleLogout(); setIsMenuOpen(false); }}>
+                  <LogOutIcon size={18} />
+                  <span>Logout</span>
+                </div>
+              </>
+            ) : (
+              <Link to="/login" className="mobile-menu-item" onClick={() => setIsMenuOpen(false)}>
+                <User size={18} />
+                <span>Login / My Account</span>
+              </Link>
+            )}
+          </div>
+        </>
+      )}
+
       <Modal
         open={open}
         onClose={handleClose}

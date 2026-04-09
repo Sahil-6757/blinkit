@@ -23,7 +23,9 @@ const ProtectedAdminRoute = ({ children }) => {
   const isAdmin = localStorage.getItem('admin') === 'true';
   const user = JSON.parse(localStorage.getItem('user'));
 
-  if (!isAdmin || !user || user.username.toLowerCase() !== 'admin') {
+  const isStaff = user?.username?.toLowerCase() === 'admin' || !!user?.role || !!user?.post;
+
+  if (!isAdmin || !user || !isStaff) {
     return <Navigate to="/login" />;
   }
   return children;

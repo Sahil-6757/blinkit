@@ -16,15 +16,48 @@ function Contactus() {
   });
 
   const [loading, setLoading] = useState(false);
+const handleChange = (e) => {
+  const { name, value } = e.target;
 
-  const handleChange = (e) => {
-    
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  if (name === "name") {
+    // Allow only alphabets and spaces
+    const onlyText = value.replace(/[^A-Za-z ]/g, "");
+    setFormData({ ...formData, name: onlyText });
+  } else {
+    setFormData({ ...formData, [name]: value });
+  }
+};
 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+  const { name, value } = e.target;
+   if (name === "name") {
+    // Allow only letters and spaces
+    const onlyText = value.replace(/[^A-Za-z ]/g, "");
+    setFormData({ ...formData, name: onlyText });
+  } else {
+    setFormData({ ...formData, [name]: value });
+  }
+    
+    if (!formData.name) {
+      toast.error("Please provide a name");
+      return;
+    }
+    if (!formData.email) {
+      toast.error("Please provide an email");
+      return;
+    }
+    if (!formData.subject) {
+      toast.error("Please provide a subject");
+      return;
+    }
+    if (!formData.message) {
+      toast.error("Please provide a message");
+      return;
+    }
+  
 
   if (!formData.email.endsWith("@gmail.com")) {
     toast.error("Only Gmail addresses are allowed",

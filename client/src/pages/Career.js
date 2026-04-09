@@ -20,19 +20,111 @@ function Career() {
   });
   const [resumePdf, setResumePdf] = useState(null);
 
-  const handleChange = (e) => {
-    const { name, value, type, files } = e.target;
-    if (type === 'file') {
-      setResumePdf(files[0]);
-    } else {
-      if (name === 'phone' && value.length > 10) return;
-      if (name === 'zip' && value.length > 6) return;
-      setFormData({ ...formData, [name]: value });
-    }
-  };
+const handleChange = (e) => {
+  const { name, value, type, files } = e.target;
+
+  // File upload
+  if (type === "file") {
+    setResumePdf(files[0]);
+    return;
+  }
+
+  // Name → only alphabets
+  if (name === "name") {
+    const onlyText = value.replace(/[^A-Za-z ]/g, "");
+    setFormData((prev) => ({ ...prev, name: onlyText }));
+    return;
+  }
+
+  // Phone → max 10 digits
+  if (name === "phone") {
+    const onlyNumbers = value.replace(/[^0-9]/g, "").slice(0, 10);
+    setFormData((prev) => ({ ...prev, phone: onlyNumbers }));
+    return;
+  }
+
+  // Zip → max 6 digits
+  if (name === "zip") {
+    const onlyNumbers = value.replace(/[^0-9]/g, "").slice(0, 6);
+    setFormData((prev) => ({ ...prev, zip: onlyNumbers }));
+    return;
+  }
+
+  if (name === "phone") {
+  // Allow only numbers
+  let onlyNumbers = value.replace(/[^0-9]/g, "");
+
+  // Restrict first digit (must be 9,8,7,6)
+  if (onlyNumbers.length === 1 && !/[9876]/.test(onlyNumbers)) {
+    return; // block invalid first digit
+  }
+
+  // Limit to 10 digits
+  onlyNumbers = onlyNumbers.slice(0, 10);
+
+  setFormData((prev) => ({ ...prev, phone: onlyNumbers }));
+  return;
+}
+
+  // Default
+  setFormData((prev) => ({ ...prev, [name]: value }));
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.resumeLink) {
+      toast.error("Please provide a resume link");
+      return;
+    }
+    if (!formData.message) {
+      toast.error("Please provide a message");
+      return;
+    }
+  
+   
+ 
+
+    if (!formData.name) {
+      toast.error("Please provide a name");
+      return;
+    }
+        if (!formData.email) {
+      toast.error("Please provide an email");
+      return;
+    }
+
+       if (!formData.phone) {
+      toast.error("Please provide a phone number");
+      return;
+    }
+
+      if (!formData.jobTitle) {
+      toast.error("Please provide a job title");
+      return;
+    }
+       if (!formData.city) {
+      toast.error("Please provide a city");
+      return;
+    }
+
+     if (!formData.address) {
+      toast.error("Please provide an address");
+      return;
+    }
+ 
+    if (!formData.state) {
+      toast.error("Please provide a state");
+      return;
+    }
+    if (!formData.zip) {
+      toast.error("Please provide a zip code");
+      return;
+    }
+    if (!formData.country) {
+      toast.error("Please provide a country");
+      return;
+    }
+    
     try {
       const data = new FormData();
       Object.keys(formData).forEach(key => {
@@ -107,22 +199,29 @@ function Career() {
         <form onSubmit={handleSubmit} className='career-form'>
           <div className='form-group'>
             <label><User size={16} /> Full Name</label>
-            <input type="text" name="name" placeholder="John Doe" value={formData.name} onChange={handleChange} required />
+            <input type="text" name="name" placeholder="John Doe" value={formData.name} onChange={handleChange} />
           </div>
 
           <div className='form-group'>
             <label><Mail size={16} /> Email Address</label>
-            <input type="email" name="email" placeholder="john@gmail.com" value={formData.email} onChange={handleChange} required pattern=".+@gmail\.com" title="Only @gmail.com emails are allowed" />
+            <input type="email" name="email" placeholder="john@gmail.com" value={formData.email} onChange={handleChange} pattern=".+@gmail\.com" title="Only @gmail.com emails are allowed" />
           </div>
 
           <div className='form-group'>
             <label><Phone size={16} /> Phone Number</label>
-            <input type="number" name="phone" placeholder="+91 98765 43210" value={formData.phone} onChange={handleChange} maxLength={10} required />
-          </div>
+          <input
+  type="text"
+  name="phone"
+  placeholder="9876543210"
+  value={formData.phone}
+  onChange={handleChange}
+  pattern="[6-9]{1}[0-9]{9}"
+  title="Phone must start with 9,8,7,6 and be 10 digits"
+/> </div>
 
           <div className='form-group'>
             <label><Briefcase size={16} /> Desired Job Title</label>
-            <select name="jobTitle" value={formData.jobTitle} onChange={handleChange} required>
+            <select name="jobTitle" value={formData.jobTitle} onChange={handleChange}>
               <option value="">Select a role</option>
               <option value="Software Engineer">Software Engineer</option>
               <option value="Product Manager">Product Manager</option>
@@ -134,41 +233,41 @@ function Career() {
 
           <div className='form-group full-width'>
             <label><Home size={16} /> Street Address</label>
-            <input type="text" name="address" placeholder="123 Main St" value={formData.address} onChange={handleChange} required />
+            <input type="text" name="address" placeholder="123 Main St" value={formData.address} onChange={handleChange} />
           </div>
 
           <div className='form-group'>
             <label><MapPin size={16} /> City</label>
-            <input type="text" name="city" placeholder="Mumbai" value={formData.city} onChange={handleChange} required />
+            <input type="text" name="city" placeholder="Mumbai" value={formData.city} onChange={handleChange} />
           </div>
 
           <div className='form-group'>
             <label><Globe size={16} /> State</label>
-            <input type="text" name="state" placeholder="Maharashtra" value={formData.state} onChange={handleChange} required />
+            <input type="text" name="state" placeholder="Maharashtra" value={formData.state} onChange={handleChange} />
           </div>
 
           <div className='form-group'>
             <label><MapPin size={16} /> Zip Code</label>
-            <input type="number" name="zip" placeholder="400001" value={formData.zip} onChange={handleChange} maxLength={6} required />
+            <input type="number" name="zip" placeholder="400001" value={formData.zip} onChange={handleChange} maxLength={6} />
           </div>
 
           <div className='form-group'>
             <label><Globe size={16} /> Country</label>
-            <input type="text" name="country" placeholder="India" value={formData.country} onChange={handleChange} required />
+            <input type="text" name="country" placeholder="India" value={formData.country} onChange={handleChange} />
           </div>
 
           <div className='form-group full-width'>
             <label><FileText size={16} /> Resume Link (Drive/Dropbox)</label>
-            <input type="text" name="resumeLink" placeholder="https://link-to-your-resume.com" value={formData.resumeLink} onChange={handleChange} required />
+            <input type="url" name="resumeLink" placeholder="https://link-to-your-resume.com" value={formData.resumeLink} onChange={handleChange} />
           </div>
           <div className='form-group full-width'>
             <label><FileText size={16} /> Upload Resume</label>
-            <input type="file" name="resumePdf" onChange={handleChange} required accept=".pdf,.docx" />
+            <input type="file" name="resumePdf" onChange={handleChange} accept=".pdf,.docx" />
           </div>
 
           <div className='form-group full-width'>
             <label>Why do you want to join us?</label>
-            <textarea name="message" rows="4" placeholder="Tell us about your passion..." value={formData.message} onChange={handleChange} required></textarea>
+            <textarea name="message" rows="4" placeholder="Tell us about your passion..." value={formData.message} onChange={handleChange}></textarea>
           </div>
 
           <div className='submit-container full-width'>

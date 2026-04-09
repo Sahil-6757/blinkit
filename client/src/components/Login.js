@@ -48,20 +48,25 @@ function Login() {
       });
 
       const data = await response.json();
+      
 
       if (response.ok) {
+        console.log(data)
         toast.success(data.message);
         if (!isRegister) {
           localStorage.setItem('user', JSON.stringify(data.user));
           // Dispatch custom event to update Navbar
           window.dispatchEvent(new Event("authChange"));
-          const uname = data.user?.username && typeof data.user.username === 'string'
-            ? data.user.username.toLowerCase()
-            : '';
-          if (uname === 'admin') {
-            navigate('/admin');
+          
+          const uname = data.user?.username?.toLowerCase() || '';
+          const hasRole = !!data.user?.role;
+          const hasPost = !!data.user?.post;
+
+          if (uname === 'admin' || hasRole || hasPost) {
             localStorage.setItem('admin', 'true');
+            navigate('/admin');
           } else {
+            localStorage.setItem('admin', 'false');
             navigate('/');
           }
         } else {
